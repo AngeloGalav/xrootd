@@ -1,0 +1,10 @@
+{
+    "name": "xrootd_dev_enviroment",
+    "build": {
+      "dockerfile": "Dockerfile"
+    },
+    "runArgs": [],
+    "mounts": [
+      "source=${localEnv:HOME}/xrootdfork,target=/xrootd,type=bind,consistency=cached"
+    ]
+}
