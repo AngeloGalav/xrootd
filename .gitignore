@@ -1,3 +1,6 @@
+build
+.vscode
+.devcontainer
 *.o
 *.lo
 .libs
@@ -5,8 +8,6 @@
 Makefile
 Makefile.in
 *.la
-build
-.vscode
 GNUmakefile.classic
 aclocal.m4
 autom4te.cache/
