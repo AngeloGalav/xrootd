@@ -1,8 +1,20 @@
-/** Contains some of the macros found in CppUnitXrdHelpers.hh,
- *  converted into GTest equivalent. 
- * 
- *  Created by Angelo Galavotti in 2023.
- */
+//------------------------------------------------------------------------------
+// Copyright (c) 2023 by European Organization for Nuclear Research (CERN)
+// Author: Angelo Galavotti <angelo.galavotti@cern.ch>
+//------------------------------------------------------------------------------
+// XRootD is free software: you can redistribute it and/or modify
+// it under the terms of the GNU Lesser General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// XRootD is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU Lesser General Public License
+// along with XRootD.  If not, see <http://www.gnu.org/licenses/>.
+//------------------------------------------------------------------------------
 
 #include <gtest/gtest.h>
 #include <XrdCl/XrdClXRootDResponses.hh>
@@ -10,12 +22,12 @@
 #include <cstring>
 
 /** @brief Equivalent of CPPUNIT_ASSERT_XRDST
- * 
- * Shows the code that we are asserting and its value 
- * in the final evaluation. 
+ *
+ * Shows the code that we are asserting and its value
+ * in the final evaluation.
  */
-#define GTEST_ASSERT_XRDST( x )                    \
-{                                                    \
-  XrdCl::XRootDStatus _st = x;                       \
+#define GTEST_ASSERT_XRDST( x )                                              \
+{                                                                            \
+  XrdCl::XRootDStatus _st = x;                                               \
   EXPECT_TRUE(_st.IsOK()) << "[" << #x << "]: " << _st.ToStr() << std::endl; \
 }
