@@ -1,0 +1,102 @@
+name: DEB
+
+on:
+  push:
+    branches:
+      - debian
+      - master
+      - packaging
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEBIAN_FRONTEND: noninteractive
+
+jobs:
+  debian:
+    name: Debian
+
+    strategy:
+      matrix:
+        version: [ 11, 12 ]
+
+    runs-on: ubuntu-latest
+    container: debian:${{ matrix.version }}
+
+    steps:
+    - name: Install development tools
+      run: |
+        apt update -qq
+        apt install -y build-essential devscripts git
+
+    - name: Clone repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install XRootD build dependencies
+      run: yes | mk-build-deps --install --remove debian/control
+
+    - name: Build DEBs
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        VERSION=$(git describe --match 'v*' | sed -e 's/v//; s/-rc/~rc/; s/-g/+git/; s/-/.post/; s/-/./')
+        dch --create --package xrootd -v ${VERSION} -M 'XRootD automated build.'
+        debuild --no-tgz-check --no-sign -b
+
+    - name: Install DEBs
+      run: apt install -y ../*.deb
+
+    - name: Run post-install checks
+      run: |
+        command -v xrdcp
+        xrdcp --version
+        command -v xrootd
+        xrootd -H
+        python3 -m pip show xrootd
+        python3 -c 'from XRootD import client; help(client)'
+        python3 -c 'import XRootD; print(XRootD)'
+        python3 -c 'import pyxrootd; print(pyxrootd)'
+        python3 -c 'from XRootD import client; print(client.FileSystem("root://localhost"))'
+
+  ubuntu:
+    name: Ubuntu (22.04)
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Install development tools
+      run: |
+        sudo apt update -qq
+        sudo apt install -y build-essential devscripts equivs git
+
+    - name: Clone repository
+      uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - name: Install XRootD build dependencies
+      run: yes | mk-build-deps --install --remove -s sudo debian/control
+
+    - name: Build DEBs
+      run: |
+        git config --global --add safe.directory "$GITHUB_WORKSPACE"
+        VERSION=$(git describe --match 'v*' | sed -e 's/v//; s/-rc/~rc/; s/-g/+git/; s/-/.post/; s/-/./')
+        dch --create --package xrootd -v ${VERSION} -M 'XRootD automated build.'
+        debuild --no-tgz-check --no-sign -b
+
+    - name: Install DEBs
+      run: sudo apt install -y ../*.deb
+
+    - name: Run post-install checks
+      run: |
+        command -v xrdcp
+        xrdcp --version
+        command -v xrootd
+        xrootd -H
+        python3 -m pip show xrootd
+        python3 -c 'from XRootD import client; help(client)'
+        python3 -c 'import XRootD; print(XRootD)'
+        python3 -c 'import pyxrootd; print(pyxrootd)'
+        python3 -c 'from XRootD import client; print(client.FileSystem("root://localhost"))'
